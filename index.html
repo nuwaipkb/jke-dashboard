@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Kursus Staf JKE — Politeknik Mukah</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1a202c;
+      --muted: #718096;
+      --blue: #3b82f6;
+      --blue-light: #eff6ff;
+      --green: #10b981;
+      --green-light: #ecfdf5;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --orange: #f59e0b;
+      --orange-light: #fffbeb;
+      --red: #ef4444;
+      --red-light: #fef2f2;
+      --teal: #0ea5e9;
+      --teal-light: #f0f9ff;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --blue-light: #1e3a5f;
+      --green-light: #052e16;
+      --purple-light: #2e1065;
+      --orange-light: #431407;
+      --red-light: #450a0a;
+      --teal-light: #0c2340;
+    }
+
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 20px 56px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      max-width: 1080px; margin: 0 auto 6px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .topbar-left h1 { font-size: 18px; font-weight: 800; line-height: 1.3; }
+    .topbar-left h1 span { color: var(--blue); }
+    .topbar-left p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-top: 2px; }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700;
+      background: #dcfce7; color: #15803d;
+      border: 1px solid #86efac;
+      border-radius: 20px; padding: 4px 10px;
+    }
+    body.dark .live-badge { background: #052e16; color: #4ade80; border-color: #166534; }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #16a34a; animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .clock-wrap {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 10px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .theme-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: var(--bg); }
+    .theme-btn svg { width: 15px; height: 15px; color: var(--muted); }
+
+    /* ── LAST UPDATED ── */
+    .last-update {
+      max-width: 1080px; margin: 0 auto 22px;
+      font-size: 11px; color: var(--muted);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      max-width: 1080px; margin: 0 auto 12px;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--muted);
+    }
+
+    /* ── STAT CARDS GRID ── */
+    .cards-grid {
+      max-width: 1080px; margin: 0 auto 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 18px;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: transform 0.17s, box-shadow 0.17s;
+      cursor: default;
+      position: relative; overflow: hidden;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    body.dark .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+
+    .card-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 4px;
+    }
+    .card-icon svg { width: 18px; height: 18px; }
+    .icon-blue   { background: var(--blue-light); }
+    .icon-green  { background: var(--green-light); }
+    .icon-purple { background: var(--purple-light); }
+    .icon-orange { background: var(--orange-light); }
+    .icon-red    { background: var(--red-light); }
+    .icon-teal   { background: var(--teal-light); }
+
+    .card-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .card-value { font-size: 34px; font-weight: 900; line-height: 1.1; }
+    .val-blue   { color: var(--blue); }
+    .val-green  { color: var(--green); }
+    .val-purple { color: var(--purple); }
+    .val-orange { color: var(--orange); }
+    .val-red    { color: var(--red); }
+    .val-teal   { color: var(--teal); }
+
+    .card-sub { font-size: 12px; color: var(--muted); }
+
+    /* mini progress inside card */
+    .mini-bar-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 4px; }
+    .mini-bar-fill  { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+    /* ── PANELS ROW ── */
+    .panels-row {
+      max-width: 1080px; margin: 0 auto 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .panels-row { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 20px 22px;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .panel-title { font-size: 14px; font-weight: 700; }
+
+    /* Jantina donut */
+    .donut-wrap { display: flex; align-items: center; gap: 20px; }
+    .donut-svg { flex-shrink: 0; }
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* KPI list */
+    .kpi-list { display: flex; flex-direction: column; gap: 10px; }
+    .kpi-item { }
+    .kpi-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+    .kpi-name { font-weight: 600; }
+    .kpi-val { font-size: 12px; color: var(--muted); }
+    .kpi-track { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .kpi-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+    .kpi-tag {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      border-radius: 4px; padding: 1px 6px; margin-left: 6px;
+      vertical-align: middle;
+    }
+    .tag-met    { background: #dcfce7; color: #15803d; }
+    .tag-near   { background: #fef9c3; color: #a16207; }
+    .tag-not    { background: #fee2e2; color: #b91c1c; }
+    body.dark .tag-met  { background: #052e16; color: #4ade80; }
+    body.dark .tag-near { background: #431407; color: #fbbf24; }
+    body.dark .tag-not  { background: #450a0a; color: #f87171; }
+
+    /* ── STAF TABLE ── */
+    .table-panel {
+      max-width: 1080px; margin: 0 auto 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .table-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .table-head .panel-title { font-size: 14px; font-weight: 700; }
+    .refresh-btn {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .refresh-btn:hover { color: var(--blue); border-color: var(--blue); }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--muted); padding: 10px 16px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    tbody td { padding: 11px 16px; font-size: 13px; }
+    .badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      border-radius: 5px; padding: 2px 7px;
+    }
+    .badge-akademik { background: var(--blue-light); color: var(--blue); }
+    .badge-bukan    { background: var(--orange-light); color: var(--orange); }
+    body.dark .badge-akademik { background: #1e3a5f; }
+    body.dark .badge-bukan    { background: #431407; }
+
+    .days-bar { display: flex; align-items: center; gap: 8px; }
+    .days-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .days-fill { height: 100%; border-radius: 99px; }
+    .days-num { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 28px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1a202c; color: #fff;
+      font-size: 13px; font-weight: 500;
+      padding: 10px 16px; border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; z-index: 99; max-width: 280px;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    body.dark .toast { background: #f1f5f9; color: #1a202c; }
+
+    footer {
+      text-align: center; font-size: 11px; color: var(--muted);
+      max-width: 1080px; margin: 32px auto 0;
+      padding-top: 18px; border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── TOP BAR ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard Kursus Staf <span>JKE</span></h1>
+      <p>Jabatan Kejuruteraan Elektrik — Politeknik Mukah</p>
+    </div>
+    <div class="topbar-right">
+      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+      <div class="clock-wrap" id="clock">--:--:--</div>
+      <button class="theme-btn" id="themeBtn" title="Tukar tema">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="last-update">Kemaskini terakhir: <span id="lastUpdate">—</span></div>
+
+  <!-- ── STAT CARDS ── -->
+  <div class="section-title">Ringkasan Maklumat</div>
+  <div class="cards-grid">
+
+    <div class="card">
+      <div class="card-icon icon-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="card-label">Jumlah Staf</div>
+      <div class="card-value val-blue" id="cntTotal">0</div>
+      <div class="card-sub">26 Akademik · 3 Bukan Akademik</div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="card-label">Jumlah Kursus</div>
+      <div class="card-value val-green" id="cntKursus">0</div>
+      <div class="card-sub">Kursus aktif tahun ini</div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon icon-purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="card-label">KPI Berkursus</div>
+      <div class="card-value val-purple">5</div>
+      <div class="card-sub">Hari minimum per staf / tahun</div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon icon-orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="card-label">Capai KPI</div>
+      <div class="card-value val-orange" id="cntMet">0</div>
+      <div class="card-sub">Staf ≥ 5 hari berkursus</div>
+      <div class="mini-bar-track">
+        <div class="mini-bar-fill" id="barMet" style="background:#f59e0b; width:0%"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon icon-teal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div class="card-label">Dalam Proses</div>
+      <div class="card-value val-teal" id="cntNear">0</div>
+      <div class="card-sub">Staf 3–4 hari berkursus</div>
+    </div>
+
+    <div class="card">
+      <div class="card-icon icon-red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <div class="card-label">Belum Capai</div>
+      <div class="card-value val-red" id="cntNot">0</div>
+      <div class="card-sub">Staf &lt; 3 hari berkursus</div>
+    </div>
+
+  </div>
+
+  <!-- ── PANELS ROW ── -->
+  <div class="section-title">Analisis Jantina &amp; KPI</div>
+  <div class="panels-row">
+
+    <!-- Jantina Donut -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Pecahan Jantina Staf</div>
+      </div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#e2e8f0" stroke-width="18"/>
+          <circle id="donutLelaki" cx="55" cy="55" r="40" fill="none" stroke="#3b82f6" stroke-width="18"
+            stroke-dasharray="0 251.2" stroke-dashoffset="62.8" stroke-linecap="round"
+            style="transition: stroke-dasharray 1.2s ease;"/>
+          <circle id="donutPerempuan" cx="55" cy="55" r="40" fill="none" stroke="#ec4899" stroke-width="18"
+            stroke-dasharray="0 251.2" stroke-dashoffset="62.8" stroke-linecap="round"
+            style="transition: stroke-dasharray 1.2s ease;"/>
+          <text x="55" y="51" text-anchor="middle" font-size="13" font-weight="800" fill="currentColor" id="donutTotal">29</text>
+          <text x="55" y="64" text-anchor="middle" font-size="9" fill="#94a3b8">Staf</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#3b82f6"></span>
+            <span>Lelaki — <strong id="legLelaki">0</strong> orang</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background:#ec4899"></span>
+            <span>Perempuan — <strong id="legPerempuan">0</strong> orang</span>
+          </div>
+          <div class="legend-item" style="margin-top:6px; font-size:12px; color:var(--muted);">
+            Nisbah L:P = <strong id="legRatio">—</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Progress -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Status KPI Berkursus</div>
+      </div>
+      <div class="kpi-list">
+        <div class="kpi-item">
+          <div class="kpi-row">
+            <span class="kpi-name">Staf Akademik <span class="kpi-tag tag-met" id="tagAkademik">—</span></span>
+            <span class="kpi-val" id="kpiAkademikVal">—</span>
+          </div>
+          <div class="kpi-track">
+            <div class="kpi-fill" id="kpiAkademikBar" style="background:#3b82f6; width:0%"></div>
+          </div>
+        </div>
+        <div class="kpi-item" style="margin-top:4px;">
+          <div class="kpi-row">
+            <span class="kpi-name">Staf Bukan Akademik <span class="kpi-tag tag-met" id="tagBukan">—</span></span>
+            <span class="kpi-val" id="kpiBukanVal">—</span>
+          </div>
+          <div class="kpi-track">
+            <div class="kpi-fill" id="kpiBukanBar" style="background:#f59e0b; width:0%"></div>
+          </div>
+        </div>
+        <div class="kpi-item" style="margin-top:4px;">
+          <div class="kpi-row">
+            <span class="kpi-name">Pencapaian Keseluruhan</span>
+            <span class="kpi-val" id="kpiOverallVal">—</span>
+          </div>
+          <div class="kpi-track">
+            <div class="kpi-fill" id="kpiOverallBar" style="background:#10b981; width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── STAF TABLE ── -->
+  <div class="section-title">Senarai Staf &amp; Hari Berkursus</div>
+  <div class="table-panel">
+    <div class="table-head">
+      <div class="panel-title">Rekod Berkursus Staf JKE</div>
+      <button class="refresh-btn" id="refreshBtn">🔄 Simulasi Kemaskini</button>
+    </div>
+    <table id="staffTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nama Staf</th>
+          <th>Kategori</th>
+          <th>Jantina</th>
+          <th>Kursus Dihadiri</th>
+          <th>Hari Berkursus</th>
+          <th>Status KPI</th>
+        </tr>
+      </thead>
+      <tbody id="staffBody"></tbody>
+    </table>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <footer>Dashboard Kursus Staf JKE · Politeknik Mukah · Dikuasakan oleh IBM Bob</footer>
+
+  <script>
+    /* ─────────────────────────────────────────
+       DATA ASAL  (boleh ganti dengan API kelak)
+    ───────────────────────────────────────── */
+    const STAF = [
+      // Akademik
+      { nama:"Ahmad Firdaus bin Ramli",    kat:"Akademik", jantina:"L", hari: 6 },
+      { nama:"Siti Norfadhilah bt Johari", kat:"Akademik", jantina:"P", hari: 5 },
+      { nama:"Mohd Haziq bin Sahari",      kat:"Akademik", jantina:"L", hari: 3 },
+      { nama:"Nurul Ain bt Hamdan",        kat:"Akademik", jantina:"P", hari: 7 },
+      { nama:"Khairul Anwar bin Musa",     kat:"Akademik", jantina:"L", hari: 4 },
+      { nama:"Farah Adila bt Daud",        kat:"Akademik", jantina:"P", hari: 5 },
+      { nama:"Zulkifli bin Hassan",        kat:"Akademik", jantina:"L", hari: 2 },
+      { nama:"Noor Hazwani bt Salleh",     kat:"Akademik", jantina:"P", hari: 5 },
+      { nama:"Ridzwan bin Che Rahim",      kat:"Akademik", jantina:"L", hari: 6 },
+      { nama:"Wan Syafiqah bt Wan Azman",  kat:"Akademik", jantina:"P", hari: 3 },
+      { nama:"Ismail bin Abd Wahab",       kat:"Akademik", jantina:"L", hari: 5 },
+      { nama:"Haslina bt Kamarudin",       kat:"Akademik", jantina:"P", hari: 4 },
+      { nama:"Mohd Asri bin Nordin",       kat:"Akademik", jantina:"L", hari: 8 },
+      { nama:"Zulaika bt Zainal",          kat:"Akademik", jantina:"P", hari: 5 },
+      { nama:"Hafizuddin bin Osman",       kat:"Akademik", jantina:"L", hari: 1 },
+      { nama:"Anis Syuhada bt Bahari",     kat:"Akademik", jantina:"P", hari: 6 },
+      { nama:"Fadzli bin Saat",            kat:"Akademik", jantina:"L", hari: 5 },
+      { nama:"Nabilah bt Roslan",          kat:"Akademik", jantina:"P", hari: 3 },
+      { nama:"Shahrizan bin Mokhtar",      kat:"Akademik", jantina:"L", hari: 4 },
+      { nama:"Suraya bt Talib",            kat:"Akademik", jantina:"P", hari: 5 },
+      { nama:"Norzaidi bin Zainudin",      kat:"Akademik", jantina:"L", hari: 2 },
+      { nama:"Atiqah bt Shamsuddin",       kat:"Akademik", jantina:"P", hari: 5 },
+      { nama:"Rosli bin Mahmud",           kat:"Akademik", jantina:"L", hari: 7 },
+      { nama:"Sharifah Aisyah bt Syed Ali",kat:"Akademik", jantina:"P", hari: 4 },
+      { nama:"Azrul Hisham bin Ramlan",    kat:"Akademik", jantina:"L", hari: 5 },
+      { nama:"Noor Syazana bt Abdul Aziz", kat:"Akademik", jantina:"P", hari: 6 },
+      // Bukan Akademik
+      { nama:"Junaidah bt Wahab",          kat:"Bukan Akademik", jantina:"P", hari: 5 },
+      { nama:"Saiful Nizam bin Samsuri",   kat:"Bukan Akademik", jantina:"L", hari: 3 },
+      { nama:"Rozilawati bt Ghani",        kat:"Bukan Akademik", jantina:"P", hari: 5 },
+    ];
+
+    const KPI = 5;
+    let data = JSON.parse(JSON.stringify(STAF));
+
+    /* ── Helpers ── */
+    let toastT;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastT);
+      toastT = setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    function countUp(el, target, ms) {
+      let v = 0; const step = Math.ceil(target / (ms / 16));
+      const t = setInterval(() => {
+        v = Math.min(v + step, target);
+        el.textContent = v;
+        if (v >= target) clearInterval(t);
+      }, 16);
+    }
+
+    function kpiStatus(hari) {
+      if (hari >= KPI) return 'met';
+      if (hari >= 3)   return 'near';
+      return 'not';
+    }
+    const kpiLabel = { met:'Capai', near:'Hampir', not:'Belum' };
+    const kpiClass = { met:'tag-met', near:'tag-near', not:'tag-not' };
+    const kpiColor = { met:'#10b981', near:'#f59e0b', not:'#ef4444' };
+
+    /* ── Render table ── */
+    function renderTable() {
+      const tbody = document.getElementById('staffBody');
+      tbody.innerHTML = '';
+      data.forEach((s, i) => {
+        const st = kpiStatus(s.hari);
+        const pct = Math.min(100, Math.round(s.hari / KPI * 100));
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color:var(--muted);font-size:12px;">${i+1}</td>
+          <td style="font-weight:600;">${s.nama}</td>
+          <td><span class="badge ${s.kat==='Akademik'?'badge-akademik':'badge-bukan'}">${s.kat}</span></td>
+          <td>${s.jantina === 'L' ? '👨 Lelaki' : '👩 Perempuan'}</td>
+          <td style="text-align:center;">${Math.ceil(s.hari / 1)} kursus</td>
+          <td>
+            <div class="days-bar">
+              <div class="days-track">
+                <div class="days-fill" style="width:${pct}%;background:${kpiColor[st]}"></div>
+              </div>
+              <span class="days-num">${s.hari}h</span>
+            </div>
+          </td>
+          <td><span class="kpi-tag ${kpiClass[st]}">${kpiLabel[st]}</span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ── Update all stats ── */
+    function updateStats(animate) {
+      const total = data.length;
+      const lelaki     = data.filter(s => s.jantina === 'L').length;
+      const perempuan  = data.filter(s => s.jantina === 'P').length;
+      const met        = data.filter(s => kpiStatus(s.hari) === 'met').length;
+      const near       = data.filter(s => kpiStatus(s.hari) === 'near').length;
+      const notMet     = data.filter(s => kpiStatus(s.hari) === 'not').length;
+      const akademik   = data.filter(s => s.kat === 'Akademik');
+      const bukan      = data.filter(s => s.kat === 'Bukan Akademik');
+      const akMet      = akademik.filter(s => kpiStatus(s.hari) === 'met').length;
+      const bkMet      = bukan.filter(s => kpiStatus(s.hari) === 'met').length;
+
+      if (animate) {
+        countUp(document.getElementById('cntTotal'), total, 800);
+        countUp(document.getElementById('cntKursus'), 20, 800);
+        countUp(document.getElementById('cntMet'), met, 800);
+        countUp(document.getElementById('cntNear'), near, 600);
+        countUp(document.getElementById('cntNot'), notMet, 600);
+        countUp(document.getElementById('legLelaki'), lelaki, 800);
+        countUp(document.getElementById('legPerempuan'), perempuan, 800);
+      } else {
+        document.getElementById('cntTotal').textContent   = total;
+        document.getElementById('cntKursus').textContent  = 20;
+        document.getElementById('cntMet').textContent     = met;
+        document.getElementById('cntNear').textContent    = near;
+        document.getElementById('cntNot').textContent     = notMet;
+        document.getElementById('legLelaki').textContent  = lelaki;
+        document.getElementById('legPerempuan').textContent = perempuan;
+      }
+
+      setTimeout(() => {
+        /* donut */
+        const circ = 2 * Math.PI * 40; // 251.2
+        const lPct = lelaki / total;
+        const pPct = perempuan / total;
+        document.getElementById('donutLelaki').setAttribute('stroke-dasharray',
+          `${lPct * circ} ${circ}`);
+        document.getElementById('donutPerempuan').setAttribute('stroke-dasharray',
+          `${pPct * circ} ${circ}`);
+        document.getElementById('donutPerempuan').setAttribute('stroke-dashoffset',
+          -(lPct * circ - 62.8));
+        document.getElementById('donutTotal').textContent = total;
+        document.getElementById('legRatio').textContent = `${lelaki}:${perempuan}`;
+
+        /* mini bar met */
+        document.getElementById('barMet').style.width = Math.round(met/total*100) + '%';
+
+        /* KPI bars */
+        const akPct = Math.round(akMet / akademik.length * 100);
+        const bkPct = Math.round(bkMet / bukan.length * 100);
+        const ovPct = Math.round(met / total * 100);
+        document.getElementById('kpiAkademikBar').style.width  = akPct + '%';
+        document.getElementById('kpiBukanBar').style.width     = bkPct + '%';
+        document.getElementById('kpiOverallBar').style.width   = ovPct + '%';
+        document.getElementById('kpiAkademikVal').textContent  = `${akMet}/${akademik.length} (${akPct}%)`;
+        document.getElementById('kpiBukanVal').textContent     = `${bkMet}/${bukan.length} (${bkPct}%)`;
+        document.getElementById('kpiOverallVal').textContent   = `${met}/${total} (${ovPct}%)`;
+
+        const tagAk = document.getElementById('tagAkademik');
+        tagAk.textContent = akPct >= 80 ? 'Baik' : akPct >= 50 ? 'Sederhana' : 'Rendah';
+        tagAk.className   = 'kpi-tag ' + (akPct >= 80 ? 'tag-met' : akPct >= 50 ? 'tag-near' : 'tag-not');
+        const tagBk = document.getElementById('tagBukan');
+        tagBk.textContent = bkPct >= 80 ? 'Baik' : bkPct >= 50 ? 'Sederhana' : 'Rendah';
+        tagBk.className   = 'kpi-tag ' + (bkPct >= 80 ? 'tag-met' : bkPct >= 50 ? 'tag-near' : 'tag-not');
+      }, animate ? 400 : 0);
+
+      renderTable();
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ms-MY');
+    }
+
+    /* ── Clock ── */
+    function tick() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('ms-MY', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+    tick(); setInterval(tick, 1000);
+
+    /* ── Dark mode ── */
+    const themeBtn  = document.getElementById('themeBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const moonSVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    const sunSVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    let dark = false;
+    themeBtn.addEventListener('click', () => {
+      dark = !dark;
+      document.body.classList.toggle('dark', dark);
+      themeIcon.innerHTML = dark ? moonSVG : sunSVG;
+      toast(dark ? '🌙 Mod gelap dihidupkan' : '☀️ Mod cerah dihidupkan');
+    });
+
+    /* ── Simulate real-time refresh ── */
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      data = data.map(s => ({
+        ...s,
+        hari: Math.min(10, Math.max(0, s.hari + (Math.random() > 0.5 ? 1 : 0)))
+      }));
+      updateStats(false);
+      toast('✅ Data dikemaskini secara simulasi!');
+    });
+
+    /* ── Auto refresh every 60s (simulate live) ── */
+    setInterval(() => {
+      document.getElementById('lastUpdate').textContent =
+        new Date().toLocaleString('ms-MY');
+    }, 60000);
+
+    /* ── Init ── */
+    updateStats(true);
+  </script>
+</body>
+</html>
